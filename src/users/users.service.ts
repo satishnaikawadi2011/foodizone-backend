@@ -60,4 +60,8 @@ export class UsersService {
 			return { ok: false, error: 'Failed to login , try again later !' };
 		}
 	}
+
+	async findById(id: string): Promise<User> {
+		return this.userRepo.findOne(id);
+	}
 }

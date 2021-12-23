@@ -11,4 +11,8 @@ export class JwtService {
 	async sign(userId: string): Promise<string> {
 		return jwt.sign({ userId }, this.options.privateKey);
 	}
+
+	async verify(token: string) {
+		return jwt.verify(token, this.options.privateKey);
+	}
 }
