@@ -10,13 +10,14 @@ import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
+import { MailService } from 'src/mail/mail.service';
 
 @Resolver((of) => User)
 export class UsersResolver {
-	constructor(private readonly usersService: UsersService) {}
+	constructor(private readonly usersService: UsersService, private readonly mailService: MailService) {}
 
 	@Query((returns) => String)
-	hello() {
+	async hello() {
 		return 'Hello World !!!!';
 	}
 

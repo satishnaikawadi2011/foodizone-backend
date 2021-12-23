@@ -12,6 +12,7 @@ import { User } from './users/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtMiddleware } from './jwt/middlewares/jwt-middleware';
+import { MailModule } from './mail/mail.module';
 
 @Module({
 	imports:
@@ -31,7 +32,9 @@ import { JwtMiddleware } from './jwt/middlewares/jwt-middleware';
 						DB_USERNAME: Joi.string().required(),
 						DB_PASSWORD: Joi.string().required(),
 						DB_NAME: Joi.string().required(),
-						SECRET_KEY: Joi.string().required()
+						SECRET_KEY: Joi.string().required(),
+						SENDGRID_FROM_EMAIL: Joi.string().required(),
+						SENDGRID_API_KEY: Joi.string().required()
 					})
 			}),
 			TypeOrmModule.forRoot({
@@ -54,6 +57,10 @@ import { JwtMiddleware } from './jwt/middlewares/jwt-middleware';
 			GraphQLModule.forRoot({
 				autoSchemaFile: true,
 				context: ({ req }) => ({ user: req['user'] })
+			}),
+			MailModule.forRoot({
+				apiKey: process.env.SENDGRID_API_KEY,
+				fromEmail: process.env.SENDGRID_FROM_EMAIL
 			}),
 			UsersModule,
 			CommonModule,
