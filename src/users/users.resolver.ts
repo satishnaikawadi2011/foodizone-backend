@@ -1,5 +1,8 @@
+import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query } from '@nestjs/graphql';
 import { Resolver } from '@nestjs/graphql';
+import { AuthUser } from 'src/auth/auth-user.decorator';
+import { AuthGuard } from 'src/auth/auth.guard';
 import { CreateAccountOutput, CreateAccountInput } from './dtos/create-accpunt.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
@@ -22,5 +25,11 @@ export class UsersResolver {
 	@Mutation((returns) => LoginOutput)
 	async login(@Args('input') loginInput: LoginInput): Promise<LoginOutput> {
 		return this.usersService.login(loginInput);
+	}
+
+	@Query((returns) => User)
+	@UseGuards(AuthGuard)
+	me(@AuthUser() authUser: User): User {
+		return authUser;
 	}
 }

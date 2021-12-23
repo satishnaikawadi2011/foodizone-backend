@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 export class AuthGuard implements CanActivate {
 	canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
 		const gqlContext = GqlExecutionContext.create(context).getContext();
+		// console.log(gqlContext);
 		const user = gqlContext['user'];
 		if (!user) {
 			return false;
