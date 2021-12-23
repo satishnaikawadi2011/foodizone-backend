@@ -1,6 +1,6 @@
 import { Field, InputType, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { CoreEntity } from 'src/common/entities/core.entity';
-import { AfterInsert, BeforeInsert, Column, Entity } from 'typeorm';
+import { AfterInsert, BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
 import * as argon from 'argon2';
 import { InternalServerErrorException } from '@nestjs/common';
 import { IsEmail, IsEnum, IsString, Length } from 'class-validator';
@@ -21,8 +21,8 @@ export class User extends CoreEntity {
 	@IsEmail()
 	email: string;
 
-	@Field()
-	@Column()
+	@Field((type) => String, { nullable: true })
+	@Column({ select: false })
 	@IsString()
 	@Length(6, 12)
 	password: string;
@@ -32,13 +32,16 @@ export class User extends CoreEntity {
 	@IsEnum(UserRole)
 	role: UserRole;
 
+	@BeforeUpdate()
 	@BeforeInsert()
 	async hashPassword(): Promise<void> {
-		try {
-			this.password = await argon.hash(this.password);
-		} catch (error) {
-			console.error(error);
-			throw new InternalServerErrorException('Something went wrong , please try again !');
+		if (this.password) {
+			try {
+				this.password = await argon.hash(this.password);
+			} catch (error) {
+				console.error(error);
+				throw new InternalServerErrorException('Something went wrong , please try again !');
+			}
 		}
 	}
 

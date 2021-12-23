@@ -1,3 +1,4 @@
+import { IsEmail } from 'class-validator';
 import { UserProfileOutput, UserProfileInput } from './dtos/user-profile.dto';
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query } from '@nestjs/graphql';
@@ -8,6 +9,7 @@ import { CreateAccountOutput, CreateAccountInput } from './dtos/create-accpunt.d
 import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
+import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 
 @Resolver((of) => User)
 export class UsersResolver {
@@ -37,23 +39,15 @@ export class UsersResolver {
 	@UseGuards(AuthGuard)
 	@Query((returns) => UserProfileOutput)
 	async userProfile(@Args() userProfileInput: UserProfileInput): Promise<UserProfileOutput> {
-		try {
-			const user = await this.usersService.findById(userProfileInput.userId);
-			if (!user) {
-				return {
-					ok: false,
-					error: 'User profile not found !'
-				};
-			}
-			return {
-				ok: true,
-				user
-			};
-		} catch (err) {
-			return {
-				ok: false,
-				error: 'User profile not found !'
-			};
-		}
+		return this.usersService.getUserProfile(userProfileInput.userId);
+	}
+
+	@UseGuards(AuthGuard)
+	@Mutation((returns) => EditProfileOutput)
+	async editProfile(
+		@AuthUser() authUser: User,
+		@Args('input') editProfileInput: EditProfileInput
+	): Promise<EditProfileOutput> {
+		return this.usersService.editProfile(authUser.id, editProfileInput);
 	}
 }

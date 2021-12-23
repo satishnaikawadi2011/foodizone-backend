@@ -1,3 +1,4 @@
+import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from 'src/jwt/jwt.service';
@@ -5,6 +6,7 @@ import { Repository } from 'typeorm';
 import { CreateAccountInput, CreateAccountOutput } from './dtos/create-accpunt.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
+import { UserProfileOutput } from './dtos/user-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -34,7 +36,16 @@ export class UsersService {
 
 	async login({ email, password }: LoginInput): Promise<LoginOutput> {
 		try {
-			const user = await this.userRepo.findOne({ email });
+			const user = await this.userRepo.findOne(
+				{ email },
+				{
+					select:
+						[
+							'id',
+							'password'
+						]
+				}
+			);
 
 			if (!user) {
 				return {
@@ -63,5 +74,48 @@ export class UsersService {
 
 	async findById(id: string): Promise<User> {
 		return this.userRepo.findOne(id);
+	}
+
+	async getUserProfile(id: string): Promise<UserProfileOutput> {
+		try {
+			const user = await this.findById(id);
+			if (!user) {
+				return {
+					ok: false,
+					error: 'User profile not found !'
+				};
+			}
+			return {
+				ok: true,
+				user
+			};
+		} catch (err) {
+			return {
+				ok: false,
+				error: 'User profile not found !'
+			};
+		}
+	}
+
+	async editProfile(id: string, { email, password }: EditProfileInput): Promise<EditProfileOutput> {
+		try {
+			const user = await this.findById(id);
+			if (email) {
+				user.email = email;
+			}
+
+			if (password) {
+				user.password = password;
+			}
+
+			await this.userRepo.save(user);
+			return { ok: true };
+		} catch (e) {
+			console.log(e);
+			return {
+				ok: false,
+				error: 'Failed to edit the profile , try again !!'
+			};
+		}
 	}
 }
