@@ -4,8 +4,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { UsersModule } from './users/users.module';
+import { CommonModule } from './common/common.module';
 
 import * as Joi from 'joi';
+import { User } from './users/entities/user.entity';
 
 @Module({
 	imports:
@@ -35,11 +38,17 @@ import * as Joi from 'joi';
 				password: process.env.DB_PASSWORD,
 				database: process.env.DB_NAME,
 				logging: process.env.NODE_ENV !== 'prod',
-				synchronize: process.env.NODE_ENV !== 'prod'
+				synchronize: process.env.NODE_ENV !== 'prod',
+				entities:
+					[
+						User
+					]
 			}),
 			GraphQLModule.forRoot({
 				autoSchemaFile: true
-			})
+			}),
+			UsersModule,
+			CommonModule
 		],
 	controllers:
 		[
