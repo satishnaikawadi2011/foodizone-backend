@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { AllCategoriesOutput } from './dtos/all-categories.dto';
+import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import { CreateRestaurantOutput, CreateRestaurantInput } from './dtos/create-restaurant-dto';
 import { DeleteRestaurantInput, DeleteRestaurantOutput } from './dtos/delete-restaurant.dto';
 import { EditRestaurantOutput, EditRestaurantInput } from './dtos/edit-restaurant.dto';
@@ -124,5 +125,39 @@ export class RestaurantsService {
 
 	countRestaurants(category: Category) {
 		return this.restaurantRepo.count({ category });
+	}
+
+	async findCategoryBySlug({ slug, page, pageLength }: CategoryInput): Promise<CategoryOutput> {
+		try {
+			const category = await this.categories.findOne({ slug });
+			if (!category) {
+				return {
+					ok: false,
+					error: 'Category not found !'
+				};
+			}
+			const restaurants = await this.restaurantRepo.find({
+				where:
+					{
+						category
+					},
+				take: pageLength,
+				skip: (page - 1) * pageLength
+			});
+			const totalResults = await this.countRestaurants(category);
+			return {
+				ok: true,
+				restaurants,
+				category,
+				totalPages: Math.ceil(totalResults / pageLength),
+				totalResults
+			};
+		} catch (e) {
+			console.log(e);
+			return {
+				ok: false,
+				error: 'Failed to load category !!'
+			};
+		}
 	}
 }
