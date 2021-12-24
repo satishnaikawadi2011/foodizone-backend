@@ -5,6 +5,7 @@ import { RestaurantsResolver } from './restaurants.resolver';
 import { Restaurant } from './entities/restaurant.entity';
 import { Category } from './entities/category.entity';
 import { CategoryRepository } from './repositories/category.repository';
+import { CategoryResolver } from './category.resolver';
 
 @Module({
 	imports:
@@ -18,7 +19,8 @@ import { CategoryRepository } from './repositories/category.repository';
 	providers:
 		[
 			RestaurantsService,
-			RestaurantsResolver
+			RestaurantsResolver,
+			CategoryResolver
 		]
 })
 export class RestaurantsModule {}
