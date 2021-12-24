@@ -18,6 +18,7 @@ import { RestaurantsModule } from './restaurants/restaurants.module';
 import { Restaurant } from './restaurants/entities/restaurant.entity';
 import { Category } from './restaurants/entities/category.entity';
 import { Dish } from './restaurants/entities/dish.entity';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
 	imports:
@@ -74,7 +75,8 @@ import { Dish } from './restaurants/entities/dish.entity';
 			UsersModule,
 			CommonModule,
 			AuthModule,
-			RestaurantsModule
+			RestaurantsModule,
+			OrdersModule
 		],
 	controllers:
 		[
