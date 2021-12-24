@@ -4,13 +4,15 @@ import { RestaurantsService } from './restaurants.service';
 import { RestaurantsResolver } from './restaurants.resolver';
 import { Restaurant } from './entities/restaurant.entity';
 import { Category } from './entities/category.entity';
+import { CategoryRepository } from './repositories/category.repository';
 
 @Module({
 	imports:
 		[
 			TypeOrmModule.forFeature([
 				Restaurant,
-				Category
+				Category,
+				CategoryRepository
 			])
 		],
 	providers:
