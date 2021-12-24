@@ -7,12 +7,17 @@ import { CreateAccountInput, CreateAccountOutput } from './dtos/create-accpunt.d
 import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 import { UserProfileOutput } from './dtos/user-profile.dto';
+import { Verification } from './entities/verification.entity';
+import { MailService } from 'src/mail/mail.service';
+import { VerifyEmailOutput } from './dtos/verify-email.dto';
 
 @Injectable()
 export class UsersService {
 	constructor(
 		@InjectRepository(User) private readonly userRepo: Repository<User>,
-		private readonly jwtService: JwtService
+		@InjectRepository(Verification) private readonly verificationRepo: Repository<Verification>,
+		private readonly jwtService: JwtService,
+		private readonly mailService: MailService
 	) {}
 
 	async createAccount({ email, password, role }: CreateAccountInput): Promise<CreateAccountOutput> {
@@ -26,7 +31,16 @@ export class UsersService {
 				};
 			}
 
-			await this.userRepo.save(this.userRepo.create({ email, password, role }));
+			const user = await this.userRepo.save(this.userRepo.create({ email, password, role }));
+
+			// After creating user , create verification and attach it to user
+			// And also send verification code to user via mail service
+			const verification = await this.verificationRepo.save(
+				this.verificationRepo.create({
+					user
+				})
+			);
+			this.mailService.sendVerificationEmail(user.email, verification.code);
 			return { ok: true };
 		} catch (error) {
 			console.log(error);
@@ -102,6 +116,13 @@ export class UsersService {
 			const user = await this.findById(id);
 			if (email) {
 				user.email = email;
+
+				// if user changes its email , make them unverified and delete previous verification record from database
+				// Also create new verification and send related code to user via mail service
+				user.verified = false;
+				await this.verificationRepo.delete({ user: { id: user.id } });
+				const verification = await this.verificationRepo.save(this.verificationRepo.create({ user }));
+				this.mailService.sendVerificationEmail(user.email, verification.code);
 			}
 
 			if (password) {
@@ -116,6 +137,29 @@ export class UsersService {
 				ok: false,
 				error: 'Failed to edit the profile , try again !!'
 			};
+		}
+	}
+
+	async verifyEmail(code: string): Promise<VerifyEmailOutput> {
+		try {
+			const verification = await this.verificationRepo.findOne(
+				{ code },
+				{
+					relations:
+						[
+							'user'
+						]
+				}
+			);
+			if (verification) {
+				verification.user.verified = true;
+				await this.userRepo.save(verification.user);
+				await this.verificationRepo.delete(verification.id);
+				return { ok: true };
+			}
+			return { ok: false, error: 'Verification not found.' };
+		} catch (error) {
+			return { ok: false, error: 'Could not verify email.' };
 		}
 	}
 }

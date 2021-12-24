@@ -11,6 +11,7 @@ import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 import { MailService } from 'src/mail/mail.service';
+import { VerifyEmailInput, VerifyEmailOutput } from './dtos/verify-email.dto';
 
 @Resolver((of) => User)
 export class UsersResolver {
@@ -50,5 +51,10 @@ export class UsersResolver {
 		@Args('input') editProfileInput: EditProfileInput
 	): Promise<EditProfileOutput> {
 		return this.usersService.editProfile(authUser.id, editProfileInput);
+	}
+
+	@Mutation((returns) => VerifyEmailOutput)
+	verifyEmail(@Args('input') { code }: VerifyEmailInput): Promise<VerifyEmailOutput> {
+		return this.usersService.verifyEmail(code);
 	}
 }
