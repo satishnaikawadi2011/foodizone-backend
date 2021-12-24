@@ -17,6 +17,7 @@ import { Verification } from './users/entities/verification.entity';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import { Restaurant } from './restaurants/entities/restaurant.entity';
 import { Category } from './restaurants/entities/category.entity';
+import { Dish } from './restaurants/entities/dish.entity';
 
 @Module({
 	imports:
@@ -55,7 +56,8 @@ import { Category } from './restaurants/entities/category.entity';
 						User,
 						Verification,
 						Restaurant,
-						Category
+						Category,
+						Dish
 					]
 			}),
 			JwtModule.forRoot({
