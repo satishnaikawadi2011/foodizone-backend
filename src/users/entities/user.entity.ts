@@ -3,7 +3,7 @@ import { CoreEntity } from 'src/common/entities/core.entity';
 import { AfterInsert, BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
 import * as argon from 'argon2';
 import { InternalServerErrorException } from '@nestjs/common';
-import { IsEmail, IsEnum, IsString, Length } from 'class-validator';
+import { IsBoolean, IsEmail, IsEnum, IsString, Length } from 'class-validator';
 
 enum UserRole {
 	Client,
@@ -31,6 +31,11 @@ export class User extends CoreEntity {
 	@Column({ type: 'enum', enum: UserRole })
 	@IsEnum(UserRole)
 	role: UserRole;
+
+	@Column({ default: false })
+	@Field((type) => Boolean)
+	@IsBoolean()
+	verified: boolean;
 
 	@BeforeUpdate()
 	@BeforeInsert()

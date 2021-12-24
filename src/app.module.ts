@@ -13,6 +13,7 @@ import { JwtModule } from './jwt/jwt.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtMiddleware } from './jwt/middlewares/jwt-middleware';
 import { MailModule } from './mail/mail.module';
+import { Verification } from './users/entities/verification.entity';
 
 @Module({
 	imports:
@@ -48,7 +49,8 @@ import { MailModule } from './mail/mail.module';
 				synchronize: process.env.NODE_ENV !== 'prod',
 				entities:
 					[
-						User
+						User,
+						Verification
 					]
 			}),
 			JwtModule.forRoot({
