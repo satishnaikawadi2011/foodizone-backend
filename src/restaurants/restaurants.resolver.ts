@@ -1,5 +1,5 @@
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { EditRestaurantInput, EditRestaurantOutput } from './dtos/edit-restaurant.dto';
 import { Role } from 'src/auth/role.decorator';
 import { AuthUser } from 'src/auth/auth-user.decorator';
@@ -7,6 +7,7 @@ import { User } from 'src/users/entities/user.entity';
 import { RestaurantsService } from './restaurants.service';
 import { CreateRestaurantInput, CreateRestaurantOutput } from './dtos/create-restaurant-dto';
 import { DeleteRestaurantInput, DeleteRestaurantOutput } from './dtos/delete-restaurant.dto';
+import { RestaurantsInput, RestaurantsOutput } from './dtos/restaurants.dto';
 
 @Resolver((of) => Restaurant)
 export class RestaurantsResolver {
@@ -43,5 +44,10 @@ export class RestaurantsResolver {
 		@Args('input') deleteRestaurantInput: DeleteRestaurantInput
 	): Promise<DeleteRestaurantOutput> {
 		return this.restaurantsService.deleteRestaurant(owner, deleteRestaurantInput);
+	}
+
+	@Query((returns) => RestaurantsOutput)
+	restaurants(@Args('input') restaurantsInput: RestaurantsInput): Promise<RestaurantsOutput> {
+		return this.restaurantsService.allRestaurants(restaurantsInput);
 	}
 }
