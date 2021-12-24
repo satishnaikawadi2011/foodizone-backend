@@ -14,6 +14,9 @@ import { AuthModule } from './auth/auth.module';
 import { JwtMiddleware } from './jwt/middlewares/jwt-middleware';
 import { MailModule } from './mail/mail.module';
 import { Verification } from './users/entities/verification.entity';
+import { RestaurantsModule } from './restaurants/restaurants.module';
+import { Restaurant } from './restaurants/entities/restaurant.entity';
+import { Category } from './restaurants/entities/category.entity';
 
 @Module({
 	imports:
@@ -50,7 +53,9 @@ import { Verification } from './users/entities/verification.entity';
 				entities:
 					[
 						User,
-						Verification
+						Verification,
+						Restaurant,
+						Category
 					]
 			}),
 			JwtModule.forRoot({
@@ -66,7 +71,8 @@ import { Verification } from './users/entities/verification.entity';
 			}),
 			UsersModule,
 			CommonModule,
-			AuthModule
+			AuthModule,
+			RestaurantsModule
 		],
 	controllers:
 		[
