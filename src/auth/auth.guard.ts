@@ -3,14 +3,20 @@ import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { assertUnionType } from 'graphql';
 import { Observable } from 'rxjs';
+import { JwtService } from 'src/jwt/jwt.service';
 import { User } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
 import { AllowedRoles } from './role.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-	constructor(private readonly reflector: Reflector) {}
+	constructor(
+		private readonly reflector: Reflector,
+		private readonly jwtService: JwtService,
+		private readonly usersService: UsersService
+	) {}
 
-	canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const roles = this.reflector.get<AllowedRoles>('roles', context.getHandler());
 
 		if (!roles) {
@@ -19,15 +25,34 @@ export class AuthGuard implements CanActivate {
 		}
 
 		const gqlContext = GqlExecutionContext.create(context).getContext();
-		const user: User = gqlContext['user'];
-		if (!user) {
+		const token = gqlContext['token'];
+		if (token) {
+			const decoded = await this.jwtService.verify(token.toString());
+
+			if (typeof decoded === 'object' && decoded.hasOwnProperty('userId')) {
+				try {
+					const user = await this.usersService.findById(decoded['userId']);
+					gqlContext['user'] = user;
+					if (!user) {
+						return false;
+					}
+
+					if (roles.includes('Any')) {
+						return true;
+					}
+
+					return roles.includes(user.role);
+				} catch (e) {
+					console.log(e);
+					return false;
+				}
+			}
+			else {
+				return false;
+			}
+		}
+		else {
 			return false;
 		}
-
-		if (roles.includes('Any')) {
-			return true;
-		}
-
-		return roles.includes(user.role);
 	}
 }

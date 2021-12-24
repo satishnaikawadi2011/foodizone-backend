@@ -69,8 +69,18 @@ import { OrderItem } from './orders/entities/order-item.entity';
 				privateKey: process.env.SECRET_KEY
 			}),
 			GraphQLModule.forRoot({
+				installSubscriptionHandlers: true,
 				autoSchemaFile: true,
-				context: ({ req }) => ({ user: req['user'] })
+				context:
+					({ req, connection }) => {
+						const TOKEN_KEY = 'auth-token';
+						return {
+							token:
+
+									req ? req.headers[TOKEN_KEY] :
+									connection.context[TOKEN_KEY]
+						};
+					}
 			}),
 			MailModule.forRoot({
 				apiKey: process.env.SENDGRID_API_KEY,
