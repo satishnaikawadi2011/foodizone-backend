@@ -6,7 +6,9 @@ import { AllCategoriesOutput } from './dtos/all-categories.dto';
 import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import { CreateDishInput, CreateDishOutput } from './dtos/create-dish.dto';
 import { CreateRestaurantOutput, CreateRestaurantInput } from './dtos/create-restaurant-dto';
+import { DeleteDishInput, DeleteDishOutput } from './dtos/delete-dish.dto';
 import { DeleteRestaurantInput, DeleteRestaurantOutput } from './dtos/delete-restaurant.dto';
+import { EditDishInput, EditDishOutput } from './dtos/edit-dish.dto';
 import { EditRestaurantOutput, EditRestaurantInput } from './dtos/edit-restaurant.dto';
 import { RestaurantInput, RestaurantOutput } from './dtos/restaurant.dto';
 import { RestaurantsInput, RestaurantsOutput } from './dtos/restaurants.dto';
@@ -267,6 +269,77 @@ export class RestaurantsService {
 			return {
 				ok: false,
 				error: 'Failed to create dish !!'
+			};
+		}
+	}
+
+	async editDish(owner: User, editDishInput: EditDishInput): Promise<EditDishOutput> {
+		try {
+			const dish = await this.dishes.findOne(editDishInput.dishId, {
+				relations:
+					[
+						'restaurant'
+					]
+			});
+			if (!dish) {
+				return {
+					ok: false,
+					error: 'Dish not found !!'
+				};
+			}
+			if (dish.restaurant.ownerId !== owner.id) {
+				return {
+					ok: false,
+					error: "You can't update the dishes from the restaurant you don't own ."
+				};
+			}
+			await this.dishes.save([
+				{
+					id: editDishInput.dishId,
+					...editDishInput
+				}
+			]);
+			return {
+				ok: true
+			};
+		} catch (e) {
+			console.log(e);
+			return {
+				ok: false,
+				error: 'Failed to update the dish !!'
+			};
+		}
+	}
+
+	async deleteDish(owner: User, { dishId }: DeleteDishInput): Promise<DeleteDishOutput> {
+		try {
+			const dish = await this.dishes.findOne(dishId, {
+				relations:
+					[
+						'restaurant'
+					]
+			});
+			if (!dish) {
+				return {
+					ok: false,
+					error: 'Dish not found !!'
+				};
+			}
+			if (dish.restaurant.ownerId !== owner.id) {
+				return {
+					ok: false,
+					error: "You can't delete the dishes from the restaurant you don't own !!"
+				};
+			}
+			await this.dishes.delete(dishId);
+			return {
+				ok: true
+			};
+		} catch (e) {
+			console.log(e);
+			return {
+				ok: false,
+				error: 'Failed to delete the dish !!'
 			};
 		}
 	}
