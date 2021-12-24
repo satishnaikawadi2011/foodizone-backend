@@ -19,6 +19,8 @@ import { Restaurant } from './restaurants/entities/restaurant.entity';
 import { Category } from './restaurants/entities/category.entity';
 import { Dish } from './restaurants/entities/dish.entity';
 import { OrdersModule } from './orders/orders.module';
+import { Order } from './orders/entities/order.entity';
+import { OrderItem } from './orders/entities/order-item.entity';
 
 @Module({
 	imports:
@@ -58,7 +60,9 @@ import { OrdersModule } from './orders/orders.module';
 						Verification,
 						Restaurant,
 						Category,
-						Dish
+						Dish,
+						Order,
+						OrderItem
 					]
 			}),
 			JwtModule.forRoot({
