@@ -5,6 +5,7 @@ import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { User, UserRole } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateOrderInput, CreateOrderOutput } from './dtos/create-order.dto';
+import { EditOrderInput, EditOrderOutput } from './dtos/edit-order.dto';
 import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
 import { OrderItem } from './entities/order-item.entity';
@@ -82,9 +83,7 @@ export class OrderService {
           items: orderItems,
         }),
       );
-    //   await this.pubSub.publish(NEW_PENDING_ORDER, {
-    //     pendingOrders: { order, ownerId: restaurant.ownerId },
-    //   });
+
       return {
         ok: true,
         orderId: order.id,
@@ -186,6 +185,63 @@ export class OrderService {
       return {
         ok: false,
         error: 'Failed to load order !!',
+      };
+    }
+    }
+    
+    async editOrder(
+    user: User,
+    { id: orderId, status }: EditOrderInput,
+  ): Promise<EditOrderOutput> {
+    try {
+      const order = await this.orders.findOne(orderId);
+      if (!order) {
+        return {
+          ok: false,
+          error: 'Order not found !!',
+        };
+      }
+      if (!this.canSeeOrder(user, order)) {
+        return {
+          ok: false,
+          error: "You are not allowed to see this order !!",
+        };
+      }
+      let canEdit = true;
+      if (user.role === UserRole.Client) {
+        canEdit = false;
+      }
+      if (user.role === UserRole.Owner) {
+        if (status !== OrderStatus.Cooking && status !== OrderStatus.Cooked) {
+          canEdit = false;
+        }
+      }
+      if (user.role === UserRole.Delivery) {
+        if (
+          status !== OrderStatus.PickedUp &&
+          status !== OrderStatus.Delivered
+        ) {
+          canEdit = false;
+        }
+      }
+      if (!canEdit) {
+        return {
+          ok: false,
+          error: "You are not allowed to edit this order !!",
+        };
+      }
+      await this.orders.save({
+        id: orderId,
+        status,
+      });
+      const newOrder = { ...order, status };
+      return {
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: 'Failed to edit order !!',
       };
     }
   }
