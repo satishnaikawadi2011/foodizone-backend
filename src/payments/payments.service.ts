@@ -42,10 +42,10 @@ export class PaymentService {
           restaurant,
         }),
       );
-    //   restaurant.isPromoted = true;
+      restaurant.isPromoted = true;
       const date = new Date();
       date.setDate(date.getDate() + 7);
-    //   restaurant.promotedUntil = date;
+      restaurant.promotedUntil = date;
       this.restaurants.save(restaurant);
       return {
         ok: true,
@@ -68,6 +68,19 @@ export class PaymentService {
         error: 'Failed to load payments !!',
       };
     }
+  }
+
+    async checkPromotedRestaurants() {
+    const restaurants = await this.restaurants.find({
+      isPromoted: true,
+      promotedUntil: LessThan(new Date()),
+    });
+    console.log(restaurants);
+    restaurants.forEach(async restaurant => {
+      restaurant.isPromoted = false;
+      restaurant.promotedUntil = null;
+      await this.restaurants.save(restaurant);
+    });
   }
 
 }

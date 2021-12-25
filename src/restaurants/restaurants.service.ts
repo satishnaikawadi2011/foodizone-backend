@@ -176,7 +176,11 @@ export class RestaurantsService {
 				totalResults
 			] = await this.restaurantRepo.findAndCount({
 				skip: (page - 1) * pageLength,
-				take: pageLength
+				take: pageLength,
+				order:
+					{
+						isPromoted: 'DESC'
+					}
 			});
 			return {
 				ok: true,
