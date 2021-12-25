@@ -157,7 +157,7 @@ export class UsersService {
 				await this.verificationRepo.delete(verification.id);
 				return { ok: true };
 			}
-			return { ok: false, error: 'Verification not found.' };
+			return { ok: false, error: 'Invalid verification code !!.' };
 		} catch (error) {
 			return { ok: false, error: 'Could not verify email.' };
 		}
