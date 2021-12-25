@@ -108,11 +108,4 @@ import { ScheduleModule } from '@nestjs/schedule';
 			AppService
 		]
 })
-export class AppModule implements NestModule {
-	configure(consumer: MiddlewareConsumer) {
-		consumer.apply(JwtMiddleware).forRoutes({
-			path: '/graphql',
-			method: RequestMethod.ALL
-		});
-	}
-}
+export class AppModule {}
