@@ -5,6 +5,7 @@ import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { User } from 'src/users/entities/user.entity';
 import { LessThan, Repository } from 'typeorm';
 import { CreatePaymentInput, CreatePaymentOuput } from './dtos/create-payment.dto';
+import { GetPaymentsOutput } from './dtos/get-payments.dto';
 import { Payment } from './entities/payment.entity';
 
 @Injectable()
@@ -51,6 +52,21 @@ export class PaymentService {
       };
     } catch {
       return { ok: false, error: 'Failed to complete the payment !!' };
+    }
+  }
+
+    async getPayments(user: User): Promise<GetPaymentsOutput> {
+    try {
+      const payments = await this.payments.find({ user: user });
+      return {
+        ok: true,
+        payments,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: 'Failed to load payments !!',
+      };
     }
   }
 
