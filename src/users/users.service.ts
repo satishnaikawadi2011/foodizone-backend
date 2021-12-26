@@ -115,6 +115,15 @@ export class UsersService {
 		try {
 			const user = await this.findById(id);
 			if (email) {
+				const isExist = await this.userRepo.findOne({ email });
+
+				if (isExist) {
+					return {
+						ok: false,
+						error: 'User with this email already exists !'
+					};
+				}
+
 				user.email = email;
 
 				// if user changes its email , make them unverified and delete previous verification record from database
