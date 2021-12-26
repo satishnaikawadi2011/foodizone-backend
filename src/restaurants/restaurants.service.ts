@@ -10,6 +10,8 @@ import { DeleteDishInput, DeleteDishOutput } from './dtos/delete-dish.dto';
 import { DeleteRestaurantInput, DeleteRestaurantOutput } from './dtos/delete-restaurant.dto';
 import { EditDishInput, EditDishOutput } from './dtos/edit-dish.dto';
 import { EditRestaurantOutput, EditRestaurantInput } from './dtos/edit-restaurant.dto';
+import { MyRestaurantInput, MyRestaurantOutput } from './dtos/my-restaurant';
+import { MyRestaurantsOutput } from './dtos/my-restaurants.dto';
 import { RestaurantInput, RestaurantOutput } from './dtos/restaurant.dto';
 import { RestaurantsInput, RestaurantsOutput } from './dtos/restaurants.dto';
 import { SearchRestaurantInput, SearchRestaurantOutput } from './dtos/search-restaurant.dto';
@@ -344,6 +346,46 @@ export class RestaurantsService {
 			return {
 				ok: false,
 				error: 'Failed to delete the dish !!'
+			};
+		}
+	}
+
+	async myRestaurants(owner: User): Promise<MyRestaurantsOutput> {
+		try {
+			const restaurants = await this.restaurantRepo.find({ owner });
+			return {
+				restaurants,
+				ok: true
+			};
+		} catch (e) {
+			console.log(e);
+			return {
+				ok: false,
+				error: 'Failed to find restaurants !!'
+			};
+		}
+	}
+	async myRestaurant(owner: User, { id }: MyRestaurantInput): Promise<MyRestaurantOutput> {
+		try {
+			const restaurant = await this.restaurantRepo.findOne(
+				{ owner, id },
+				{
+					relations:
+						[
+							'menu',
+							'orders'
+						]
+				}
+			);
+			return {
+				restaurant,
+				ok: true
+			};
+		} catch (e) {
+			console.log(e);
+			return {
+				ok: false,
+				error: 'Failed to find restaurant !!'
 			};
 		}
 	}
