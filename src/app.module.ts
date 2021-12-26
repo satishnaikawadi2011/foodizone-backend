@@ -24,6 +24,7 @@ import { OrderItem } from './orders/entities/order-item.entity';
 import { PaymentsModule } from './payments/payments.module';
 import { Payment } from './payments/entities/payment.entity';
 import { ScheduleModule } from '@nestjs/schedule';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
 	imports:
@@ -45,7 +46,10 @@ import { ScheduleModule } from '@nestjs/schedule';
 						DB_NAME: Joi.string().required(),
 						SECRET_KEY: Joi.string().required(),
 						SENDGRID_FROM_EMAIL: Joi.string().required(),
-						SENDGRID_API_KEY: Joi.string().required()
+						SENDGRID_API_KEY: Joi.string().required(),
+						CLOUDINARY_API_KEY: Joi.string().required(),
+						CLOUDINARY_API_SECRET: Joi.string().required(),
+						CLOUDINARY_CLOUD_NAME: Joi.string().required()
 					})
 			}),
 			TypeOrmModule.forRoot({
@@ -97,7 +101,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 			AuthModule,
 			RestaurantsModule,
 			OrdersModule,
-			PaymentsModule
+			PaymentsModule,
+			UploadsModule
 		],
 	controllers:
 		[
