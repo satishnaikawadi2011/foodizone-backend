@@ -12,4 +12,10 @@ export class CategoryRepository extends Repository<Category> {
 		}
 		return category;
 	}
+
+	getSlug(name: string): string {
+		const categoryName = name.trim().toLowerCase();
+		const categorySlug = categoryName.replace(/ /g, '-');
+		return categorySlug;
+	}
 }

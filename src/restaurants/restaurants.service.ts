@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Raw, Repository } from 'typeorm';
+import { AddCategoryInput, AddCategoryOutput } from './dtos/add-category';
 import { AllCategoriesOutput } from './dtos/all-categories.dto';
 import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import { CreateDishInput, CreateDishOutput } from './dtos/create-dish.dto';
@@ -32,8 +33,14 @@ export class RestaurantsService {
 		try {
 			const newRestaurant = await this.restaurantRepo.create(createRestaurantInput);
 			newRestaurant.owner = owner;
-			const category = await this.categories.getOrCreate(createRestaurantInput.categoryName);
-			newRestaurant.category = category;
+			const category = await this.categories.findOne({ where: { slug: createRestaurantInput.categorySlug } });
+			if (category) {
+				newRestaurant.category = category;
+			}
+			else {
+				newRestaurant.category = await this.categories.findOne({ slug: 'others' });
+			}
+
 			await this.restaurantRepo.save(newRestaurant);
 			return {
 				ok: true,
@@ -68,8 +75,11 @@ export class RestaurantsService {
 			}
 
 			let category: Category = null;
-			if (editRestaurantInput.categoryName) {
-				category = await this.categories.getOrCreate(editRestaurantInput.categoryName);
+			if (editRestaurantInput.categorySlug) {
+				category = await this.categories.findOne({ where: { slug: editRestaurantInput.categorySlug } });
+				if (!category) {
+					category = await this.categories.findOne({ slug: 'others' });
+				}
 			}
 			await this.restaurantRepo.save([
 				{
@@ -387,6 +397,26 @@ export class RestaurantsService {
 				ok: false,
 				error: 'Failed to find restaurant !!'
 			};
+		}
+	}
+
+	async addCategory(addCategoryInput: AddCategoryInput): Promise<AddCategoryOutput> {
+		try {
+			const { img, name } = addCategoryInput;
+			const slug = this.categories.getSlug(name);
+			const category = this.categories.findOne({ where: { slug } });
+			if (category) {
+				return {
+					ok: false,
+					error: 'Category with this name already exists !!'
+				};
+			}
+
+			const c = await this.categories.save(this.categories.create({ img, name, slug }));
+			return { ok: true, categoryId: c.id };
+		} catch (e) {
+			console.log(e);
+			return { ok: false, error: 'Failed to add category !!!' };
 		}
 	}
 }
