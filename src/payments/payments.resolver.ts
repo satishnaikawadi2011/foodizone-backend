@@ -1,3 +1,4 @@
+import { CreateCheckoutSessionOuput, CreateCheckoutSessionInput } from './dtos/create-checkout-session.dto';
 import { Args, Mutation, Resolver, Query } from '@nestjs/graphql';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/role.decorator';
@@ -28,5 +29,15 @@ export class PaymentResolver {
 	])
 	getPayments(@AuthUser() user: User): Promise<GetPaymentsOutput> {
 		return this.paymentService.getPayments(user);
+	}
+
+	@Mutation((returns) => CreateCheckoutSessionOuput)
+	@Role([
+		'Owner'
+	])
+	createCheckoutSession(
+		@Args('input') createCheckoutSessionInput: CreateCheckoutSessionInput
+	): Promise<CreatePaymentOuput> {
+		return this.paymentService.createCheckoutSession(createCheckoutSessionInput);
 	}
 }

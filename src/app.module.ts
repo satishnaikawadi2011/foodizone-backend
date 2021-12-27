@@ -49,7 +49,9 @@ import { UploadsModule } from './uploads/uploads.module';
 						SENDGRID_API_KEY: Joi.string().required(),
 						CLOUDINARY_API_KEY: Joi.string().required(),
 						CLOUDINARY_API_SECRET: Joi.string().required(),
-						CLOUDINARY_CLOUD_NAME: Joi.string().required()
+						CLOUDINARY_CLOUD_NAME: Joi.string().required(),
+						STRIPE_SECRET_TEST_KEY: Joi.string().required(),
+						FRONTEND_BASE_URL: Joi.string().required()
 					})
 			}),
 			TypeOrmModule.forRoot({
@@ -96,12 +98,14 @@ import { UploadsModule } from './uploads/uploads.module';
 				apiKey: process.env.SENDGRID_API_KEY,
 				fromEmail: process.env.SENDGRID_FROM_EMAIL
 			}),
+			PaymentsModule.forRoot({
+				secretKey: process.env.STRIPE_SECRET_TEST_KEY
+			}),
 			UsersModule,
 			CommonModule,
 			AuthModule,
 			RestaurantsModule,
 			OrdersModule,
-			PaymentsModule,
 			UploadsModule
 		],
 	controllers:

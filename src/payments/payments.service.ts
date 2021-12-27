@@ -1,12 +1,16 @@
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { User } from 'src/users/entities/user.entity';
 import { LessThan, Repository } from 'typeorm';
+import { PAYMENT_CONFIG_OPTIONS } from './constants';
 import { CreatePaymentInput, CreatePaymentOuput } from './dtos/create-payment.dto';
 import { GetPaymentsOutput } from './dtos/get-payments.dto';
 import { Payment } from './entities/payment.entity';
+import { PaymentModuleOptions } from './interfaces';
+import Stripe from 'stripe'
+import { CreateCheckoutSessionInput, CreateCheckoutSessionOuput } from './dtos/create-checkout-session.dto';
 
 @Injectable()
 export class PaymentService {
@@ -15,11 +19,14 @@ export class PaymentService {
     private readonly payments: Repository<Payment>,
     @InjectRepository(Restaurant)
     private readonly restaurants: Repository<Restaurant>,
-  ) {}
+    @Inject(PAYMENT_CONFIG_OPTIONS) private readonly options: PaymentModuleOptions
+  ) { }
+
+  private stripeApi = new Stripe(this.options.secretKey,{ apiVersion: '2020-08-27',});
 
   async createPayment(
     owner: User,
-    { transactionId, restaurantId }: CreatePaymentInput,
+    { restaurantId }: CreatePaymentInput,
   ): Promise<CreatePaymentOuput> {
     try {
       const restaurant = await this.restaurants.findOne(restaurantId);
@@ -37,7 +44,6 @@ export class PaymentService {
       }
       await this.payments.save(
         this.payments.create({
-          transactionId,
           user: owner,
           restaurant,
         }),
@@ -81,6 +87,37 @@ export class PaymentService {
       restaurant.promotedUntil = null;
       await this.restaurants.save(restaurant);
     });
+  }
+
+  async createCheckoutSession(createCheckoutSessionInput:CreateCheckoutSessionInput):Promise<CreateCheckoutSessionOuput> {
+    try {
+      const { customer_email,line_items} = createCheckoutSessionInput;
+      if (line_items.length === 0) {
+        return {
+          ok: false,
+          error:'Please provide the line items for the payment session !!'
+        }
+      }
+
+      const session = await this.stripeApi.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'payment',
+        customer_email,
+        line_items,
+        success_url: `${process.env.FRONTEND_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url:`${process.env.FRONTEND_BASE_URL}/canceled`
+      })
+      return {
+        ok: true,
+        session_id:session.id
+      }
+    } catch (e) {
+      console.log(e)
+      return {
+        ok: false,
+        error:'Something went wrong , unable to create payment session !'
+      }
+    }
   }
 
 }
