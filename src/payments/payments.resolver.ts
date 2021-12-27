@@ -35,9 +35,9 @@ export class PaymentResolver {
 	@Role([
 		'Owner'
 	])
-	createCheckoutSession(
+	createCheckoutSessionForRestaurantPromotion(
 		@Args('input') createCheckoutSessionInput: CreateCheckoutSessionInput
 	): Promise<CreatePaymentOuput> {
-		return this.paymentService.createCheckoutSession(createCheckoutSessionInput);
+		return this.paymentService.createCheckoutSessionForRestaurantPromotion(createCheckoutSessionInput);
 	}
 }

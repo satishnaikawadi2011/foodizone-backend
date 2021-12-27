@@ -49,6 +49,10 @@ export class Item {
 @InputType()
 export class CreateCheckoutSessionInput {
 	@Field()
+	@IsString()
+	restaurant_id: string;
+
+	@Field()
 	@IsEmail()
 	customer_email: string;
 

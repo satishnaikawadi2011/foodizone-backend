@@ -12,14 +12,15 @@ export class Payment extends CoreEntity {
 	@ManyToOne((type) => User, (user) => user.payments)
 	user: User;
 
+	@Field()
 	@RelationId((payment: Payment) => payment.user)
-	userId: number;
+	userId: string;
 
 	@Field((type) => Restaurant)
 	@ManyToOne((type) => Restaurant)
 	restaurant: Restaurant;
 
-	@Field((type) => Int)
+	@Field((type) => String)
 	@RelationId((payment: Payment) => payment.restaurant)
-	restaurantId: number;
+	restaurantId: string;
 }

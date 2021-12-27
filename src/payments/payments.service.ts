@@ -89,9 +89,9 @@ export class PaymentService {
     });
   }
 
-  async createCheckoutSession(createCheckoutSessionInput:CreateCheckoutSessionInput):Promise<CreateCheckoutSessionOuput> {
+  async createCheckoutSessionForRestaurantPromotion(createCheckoutSessionInput:CreateCheckoutSessionInput):Promise<CreateCheckoutSessionOuput> {
     try {
-      const { customer_email,line_items} = createCheckoutSessionInput;
+      const { customer_email,line_items,restaurant_id} = createCheckoutSessionInput;
       if (line_items.length === 0) {
         return {
           ok: false,
@@ -104,9 +104,10 @@ export class PaymentService {
         mode: 'payment',
         customer_email,
         line_items,
-        success_url: `${process.env.FRONTEND_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${process.env.FRONTEND_BASE_URL}/success/${restaurant_id}?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url:`${process.env.FRONTEND_BASE_URL}/canceled`
       })
+
       return {
         ok: true,
         session_id:session.id
