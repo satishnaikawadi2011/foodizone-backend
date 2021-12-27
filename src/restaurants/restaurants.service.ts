@@ -404,7 +404,7 @@ export class RestaurantsService {
 		try {
 			const { img, name } = addCategoryInput;
 			const slug = this.categories.getSlug(name);
-			const category = this.categories.findOne({ where: { slug } });
+			const category = await this.categories.findOne({ where: { slug } });
 			if (category) {
 				return {
 					ok: false,
