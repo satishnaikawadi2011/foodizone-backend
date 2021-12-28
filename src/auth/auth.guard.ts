@@ -23,9 +23,9 @@ export class AuthGuard implements CanActivate {
 			// if we havent set any role on the resource that means it is public resource
 			return true;
 		}
-
 		const gqlContext = GqlExecutionContext.create(context).getContext();
 		const token = gqlContext['token'];
+		console.log(token);
 		if (token) {
 			const decoded = await this.jwtService.verify(token.toString());
 

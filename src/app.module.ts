@@ -82,6 +82,16 @@ import { UploadsModule } from './uploads/uploads.module';
 			}),
 			GraphQLModule.forRoot({
 				installSubscriptionHandlers: true,
+				subscriptions:
+					{
+						'subscriptions-transport-ws':
+							{
+								onConnect:
+									(connectionParams) => {
+										return { token: connectionParams['auth-token'] };
+									}
+							}
+					},
 				autoSchemaFile: true,
 				context:
 					({ req, connection }) => {
@@ -90,7 +100,7 @@ import { UploadsModule } from './uploads/uploads.module';
 							token:
 
 									req ? req.headers[TOKEN_KEY] :
-									connection.context[TOKEN_KEY]
+									connection[TOKEN_KEY]
 						};
 					}
 			}),
